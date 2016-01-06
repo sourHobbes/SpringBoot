@@ -16,14 +16,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * Time:   2:38 PM
  */
 @EnableAutoConfiguration
-@Configuration
 @ComponentScan(
       basePackages = {"com.vmware.sdugar.db",
                       "com.vmware.sdugar.app",
                       "com.vmware.sdugar.rest",
                       "com.vmware.sdugar.model"}
 )
-@EnableJpaRepositories(basePackages = {"com.vmware.sdugar.db"})
 public class App {
    public static void main(String[] args) throws Throwable {
       SpringApplication app = new SpringApplication(App.class);
