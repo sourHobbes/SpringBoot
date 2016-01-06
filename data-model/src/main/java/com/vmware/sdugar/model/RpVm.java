@@ -22,4 +22,12 @@ public class RpVm {
 
    @ManyToOne
    private RPlan rp;
+
+   public Long getId() {
+      return id;
+   }
+
+   public RPlan getRp() {
+      return rp;
+   }
 }

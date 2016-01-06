@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import com.mysema.query.types.Predicate;
 import com.vmware.sdugar.model.QRPlan;
+import com.vmware.sdugar.model.QRpVm;
 import com.vmware.sdugar.model.RPlan;
+import com.vmware.sdugar.model.RpVm;
 
 /**
  * Author: sdugar
@@ -29,6 +31,9 @@ import com.vmware.sdugar.model.RPlan;
 public class PgDbService {
    @Autowired
    private RPlanRepository planRepository;
+
+   @Autowired
+   private RpVmRepository vmRepository;
 
    protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -52,9 +57,11 @@ public class PgDbService {
    }
 
    @Transactional(readOnly = true)
-   public List<RPlan> queryPlanbyName(String planName) {
+   public List<RpVm> queryPlanbyName(String planName) {
       Predicate nameIs = QRPlan.rPlan.planName.containsIgnoreCase(planName);
       Iterable<RPlan> plans = planRepository.findAll(nameIs);
-      return Lists.newArrayList(plans);
+      Predicate selectVms = QRpVm.rpVm.rp.planName.containsIgnoreCase(planName);
+      Iterable<RpVm> vms = vmRepository.findAll(selectVms);
+      return Lists.newArrayList(vms);
    }
 }

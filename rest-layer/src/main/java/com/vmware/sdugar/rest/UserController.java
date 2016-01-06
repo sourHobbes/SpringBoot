@@ -16,6 +16,7 @@ import com.vmware.sdugar.db.PgDbService;
 import com.vmware.sdugar.db.PgSpring;
 import com.vmware.sdugar.db.RPlanRepository;
 import com.vmware.sdugar.model.RPlan;
+import com.vmware.sdugar.model.RpVm;
 import com.vmware.sdugar.model.User;
 
 /**
@@ -63,9 +64,10 @@ public class UserController {
    }
 
    @RequestMapping("plan_like")
-   public List<RPlan> listPlansLike(@RequestParam("match") String match) {
+   public List<RpVm> listPlansLike(@RequestParam("match") String match) {
       log.info("Querying plans with name containing {}", match);
-      return dbService.queryPlanbyName(match);
+      List<RpVm> vmsFound = dbService.queryPlanbyName(match);
+      return vmsFound;
    }
    /*
    @RequestMapping("users")

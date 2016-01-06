@@ -18,7 +18,7 @@ import com.vmware.sdugar.model.RPlan;
  * Date:   12/28/15
  * Time:   3:19 PM
  */
-@Transactional
+@Transactional(readOnly = true)
 public interface RPlanRepository extends JpaRepository<RPlan, UUID>,
       QueryDslPredicateExecutor<RPlan> {
 
