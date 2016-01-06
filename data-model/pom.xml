@@ -60,13 +60,15 @@
       <dependency>
          <groupId>com.mysema.querydsl</groupId>
          <artifactId>querydsl-apt</artifactId>
-         <version>2.2.3</version>
+         <version>3.7.0</version>
       </dependency>
+      <!--
       <dependency>
          <groupId>com.mysema.querydsl</groupId>
          <artifactId>querydsl-jpa</artifactId>
          <classifier>apt</classifier>
-         <version>2.2.3</version>
+         <version>3.7.0</version>
       </dependency>
+      -->
    </dependencies>
 </project>

@@ -62,6 +62,11 @@ public class UserController {
       return dbService.createPlan(planName);
    }
 
+   @RequestMapping("plan_like")
+   public List<RPlan> listPlansLike(@RequestParam("match") String match) {
+      log.info("Querying plans with name containing {}", match);
+      return dbService.queryPlanbyName(match);
+   }
    /*
    @RequestMapping("users")
    public List<User> getUsers(@RequestParam("ids") long[] ids) {

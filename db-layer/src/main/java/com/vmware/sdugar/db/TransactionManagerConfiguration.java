@@ -35,7 +35,6 @@ public class TransactionManagerConfiguration {
             new JpaTransactionManager();
       tm.setEntityManagerFactory(emf);
       tm.setDataSource(dataSource);
-      tm.setJpaDialect(new HibernateJpaDialect());
       return tm;
    }
 }

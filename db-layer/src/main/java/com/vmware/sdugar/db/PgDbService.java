@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
@@ -54,7 +53,7 @@ public class PgDbService {
 
    @Transactional(readOnly = true)
    public List<RPlan> queryPlanbyName(String planName) {
-      Predicate nameIs = QRPlan.rPlan.planName.like(planName);
+      Predicate nameIs = QRPlan.rPlan.planName.containsIgnoreCase(planName);
       Iterable<RPlan> plans = planRepository.findAll(nameIs);
       return Lists.newArrayList(plans);
    }
