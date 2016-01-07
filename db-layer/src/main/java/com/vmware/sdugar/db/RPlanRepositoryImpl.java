@@ -35,7 +35,7 @@ public class RPlanRepositoryImpl implements CustomRplanRepository {
       this.em = em;
    }
 
-   @Transactional
+   @Transactional(value = Transactional.TxType.REQUIRES_NEW)
    public String customFindRPlanId(final String name) {
       return template.execute(new TransactionCallback<String>() {
          public String doInTransaction(TransactionStatus status) {
@@ -51,7 +51,7 @@ public class RPlanRepositoryImpl implements CustomRplanRepository {
             Query query = em.createNativeQuery("select * from rplan where planname like :name",
                   RPlan.class);
             query.setParameter("name", name);
-            return ((RPlan)query.getResultList().get(0)).getPlanName();
+            return ((RPlan)query.getSingleResult()).getPlanName();
          }
       });
    }

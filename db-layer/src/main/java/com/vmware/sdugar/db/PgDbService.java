@@ -57,13 +57,18 @@ public class PgDbService {
       //return created_plan.getPlanId().toString();
    }
 
-   //@Transactional(readOnly = true)
+   @Transactional
    public List<RpVm> queryPlanbyName(String planName) {
+      RPlan plan = new RPlan();
+      plan.setPlanName(planName + "vanilla");
+      RPlan createdPlan = planRepository.save(plan);
       Predicate nameIs = QRPlan.rPlan.planName.containsIgnoreCase(planName);
       Iterable<RPlan> plans = planRepository.findAll(nameIs);
       Predicate selectVms = QRpVm.rpVm.rp.planName.containsIgnoreCase(planName);
       Iterable<RpVm> vms = vmRepository.findAll(selectVms);
-      String customName = planRepository.customFindRPlanId(planName);
+      try {
+         String customName = planRepository.customFindRPlanId(planName);
+      } catch (Exception e) { log.error("Caught exception ", e); }
       return Lists.newArrayList(vms);
    }
 }
