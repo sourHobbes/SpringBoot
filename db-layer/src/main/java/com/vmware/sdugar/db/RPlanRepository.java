@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.sdugar.model.RPlan;
@@ -19,7 +20,7 @@ import com.vmware.sdugar.model.RPlan;
  * Time:   3:19 PM
  */
 @Transactional(readOnly = true)
-public interface RPlanRepository extends JpaRepository<RPlan, UUID>,
+public interface RPlanRepository extends CustomRplanRepository, CrudRepository<RPlan, UUID>,
       QueryDslPredicateExecutor<RPlan> {
 
    Page<RPlan> findByPlanId(UUID id, Pageable page);

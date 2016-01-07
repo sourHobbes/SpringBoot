@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = {"com.vmware.sdugar.db"})
+//@EnableJpaRepositories(basePackages = {"com.vmware.sdugar.db"})
 public class TransactionManagerConfiguration {
    @Autowired
    EntityManagerFactory emf;

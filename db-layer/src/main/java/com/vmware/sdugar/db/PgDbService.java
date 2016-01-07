@@ -28,7 +28,7 @@ import com.vmware.sdugar.model.RpVm;
  */
 @Configurable
 @Configuration
-@org.springframework.transaction.annotation.Transactional(readOnly = true)
+@org.springframework.transaction.annotation.Transactional
 public class PgDbService {
    @Autowired
    private RPlanRepository planRepository;
@@ -57,12 +57,13 @@ public class PgDbService {
       //return created_plan.getPlanId().toString();
    }
 
-   @Transactional(readOnly = true)
+   //@Transactional(readOnly = true)
    public List<RpVm> queryPlanbyName(String planName) {
       Predicate nameIs = QRPlan.rPlan.planName.containsIgnoreCase(planName);
       Iterable<RPlan> plans = planRepository.findAll(nameIs);
       Predicate selectVms = QRpVm.rpVm.rp.planName.containsIgnoreCase(planName);
       Iterable<RpVm> vms = vmRepository.findAll(selectVms);
+      String customName = planRepository.customFindRPlanId(planName);
       return Lists.newArrayList(vms);
    }
 }
