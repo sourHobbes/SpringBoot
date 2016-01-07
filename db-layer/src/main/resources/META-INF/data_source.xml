@@ -38,6 +38,6 @@
       </property>
    </bean>
 
-   <context:property-placeholder location="jdbc.properties"/>
+   <jpa:property-placeholder location="jdbc.properties"/>
    <!--<jpa:property-placeholder location="jdbc.properties"/>-->
 </beans>
