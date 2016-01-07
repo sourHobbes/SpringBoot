@@ -14,8 +14,6 @@ import java.util.List;
 
 import com.vmware.sdugar.db.PgDbService;
 import com.vmware.sdugar.db.PgSpring;
-import com.vmware.sdugar.db.RPlanRepository;
-import com.vmware.sdugar.model.RPlan;
 import com.vmware.sdugar.model.RpVm;
 import com.vmware.sdugar.model.User;
 
