@@ -3,9 +3,7 @@
  * **********************************************************************/
 package com.vmware.sdugar.db;
 
-import java.beans.Transient;
 import java.util.Random;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -39,8 +37,6 @@ public class RPlanRepositoryImpl implements CustomRplanRepository {
    public String customFindRPlanId(final String name) {
       return template.execute(new TransactionCallback<String>() {
          public String doInTransaction(TransactionStatus status) {
-
-            RPlan plan = new RPlan();
             Query createQuery = em.createNativeQuery(
                   "insert into rpvm values (:id, (select planid from rplan where planname like " +
                         "'newd'));");
