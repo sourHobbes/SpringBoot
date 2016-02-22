@@ -25,5 +25,7 @@ public interface RPlanRepository extends CustomRplanRepository, CrudRepository<R
 
    Page<RPlan> findByPlanId(UUID id, Pageable page);
 
+   RPlan findByPlanId(UUID id);
+
    RPlan findByPlanName(String planName);
 }

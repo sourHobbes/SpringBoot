@@ -24,6 +24,8 @@ public class QRpVm extends EntityPathBase<RpVm> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final StringPath Name = createString("Name");
+
     public final QRPlan rp;
 
     public QRpVm(String variable) {

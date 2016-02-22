@@ -3,11 +3,7 @@
  * **********************************************************************/
 package com.vmware.sdugar.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 /**
  * Author: sdugar
@@ -20,7 +16,12 @@ public class RpVm {
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
 
-   @ManyToOne
+   @Column()
+   @Basic(optional = false)
+   private String Name;
+
+   @ManyToOne(optional = false)
+   @JoinColumn(name="rplan_planid")
    private RPlan rp;
 
    public Long getId() {
@@ -29,5 +30,32 @@ public class RpVm {
 
    public RPlan getRp() {
       return rp;
+   }
+
+   public void setRp(RPlan rp) {
+      this.rp = rp;
+   }
+
+   public String getName() {
+      return Name;
+   }
+
+   public void setName(String name) {
+      Name = name;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      RpVm rpVm = (RpVm) o;
+
+      return id != null ? id.equals(rpVm.id) : rpVm.id == null;
+   }
+
+   @Override
+   public int hashCode() {
+      return id != null ? id.hashCode() : 0;
    }
 }

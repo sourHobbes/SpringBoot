@@ -4,15 +4,13 @@
 package com.vmware.sdugar.model;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
-
 
 /**
  * Author: sdugar
@@ -21,15 +19,18 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @Entity
 public class RPlan {
-
    @Id
-   @org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
+   //@org.hibernate.annotations.Type(type="org.hibernate.type.PostgresUUIDType")
    @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
    @GeneratedValue(generator = "uuid-gen")
    private UUID planId;
 
    @Column(unique = true)
    private String planName;
+
+   @OneToMany(mappedBy="rp", cascade = CascadeType.ALL, orphanRemoval = true,
+      fetch = FetchType.EAGER)
+   private List<RpVm> vms = new ArrayList<>();
 
    public String getPlanName() {
       return planName;
@@ -41,5 +42,13 @@ public class RPlan {
 
    public UUID getPlanId() {
       return planId;
+   }
+
+   public List<RpVm> getVms() {
+      return vms;
+   }
+
+   public void setVms(List<RpVm> vms) {
+      this.vms = vms;
    }
 }

@@ -7,6 +7,7 @@ import com.mysema.query.types.path.*;
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
 import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -22,6 +23,8 @@ public class QRPlan extends EntityPathBase<RPlan> {
     public final ComparablePath<java.util.UUID> planId = createComparable("planId", java.util.UUID.class);
 
     public final StringPath planName = createString("planName");
+
+    public final ListPath<RpVm, QRpVm> vms = this.<RpVm, QRpVm>createList("vms", RpVm.class, QRpVm.class, PathInits.DIRECT2);
 
     public QRPlan(String variable) {
         super(RPlan.class, forVariable(variable));

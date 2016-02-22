@@ -24,8 +24,8 @@ import com.vmware.sdugar.model.User;
  * Date:   12/8/15
  * Time:   2:08 PM
  */
-@Repository
-@ImportResource("classpath:META-INF/data_source.xml")
+//@Repository
+//@ImportResource("classpath:META-INF/data_source.xml")
 public class PgSpring {
    protected final Logger logger = org.slf4j.LoggerFactory.getLogger(PgSpring.class);
 
