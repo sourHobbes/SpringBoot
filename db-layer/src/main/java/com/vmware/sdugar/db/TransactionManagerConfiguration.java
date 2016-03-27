@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
-//@EnableJpaRepositories(basePackages = {"com.vmware.sdugar.db"})
 @ImportResource("classpath:META-INF/data_source.xml")
 public class TransactionManagerConfiguration {
    @Autowired

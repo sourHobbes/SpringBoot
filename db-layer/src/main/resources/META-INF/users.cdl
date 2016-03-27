@@ -1,6 +1,0 @@
-CREATE TABLE IF NOT EXISTS ints (
-   id int,
-   state text,
-
-   PRIMARY KEY (id)
-);
