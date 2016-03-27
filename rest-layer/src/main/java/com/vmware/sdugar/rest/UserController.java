@@ -27,9 +27,10 @@ import com.vmware.sdugar.model.User;
 @SuppressWarnings("unused")
 public class UserController {
    protected final Logger log = LoggerFactory.getLogger(getClass());
-
-   @Autowired
-   private PgSpring users;
+   //use only when we have a postgres db
+   // and a jdbc connection to it
+   //@Autowired
+   //private PgSpring users;
 
    @Autowired
    private PgDbService dbService;
@@ -40,6 +41,10 @@ public class UserController {
       return "OK";
    }
 
+   /*
+   // useful only with PgSpring class
+   // for PgSpring to be instantiated we need
+   // a postgres db with which we can establish a jdbc connection
    @RequestMapping("user")
    public User getUser(@RequestParam("id") long id) {
       log.info("fetching user with id {}", id);
@@ -54,6 +59,7 @@ public class UserController {
       users.createUser(id, name, phone);
       return "OK";
    }
+   */
 
    @RequestMapping("create_plan")
    public String createPlan(@RequestParam("name") String planName) {

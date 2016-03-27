@@ -20,7 +20,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public static final QProduct product = new QProduct("product");
 
-    public final SetPath<Part, QPart> parts = this.<Part, QPart>createSet("parts", Part.class, QPart.class, PathInits.DIRECT2);
+    public final ListPath<Part, QPart> parts = this.<Part, QPart>createList("parts", Part.class, QPart.class, PathInits.DIRECT2);
 
     public final NumberPath<Integer> serialNumber = createNumber("serialNumber", Integer.class);
 
