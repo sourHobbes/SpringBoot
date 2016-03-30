@@ -1,7 +1,5 @@
 package com.vmware.sdugar.model;
 
-import org.springframework.context.annotation.Configuration;
-
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
@@ -44,9 +42,8 @@ public class PkCrypt {
         PublicKey pk = kf.generatePublic(publicKeySpec);
 
         // write AES key
-        pkCipher.init(Cipher.DECRYPT_MODE, pk);
+        pkCipher.init(Cipher.ENCRYPT_MODE, pk);
         CipherOutputStream os = new CipherOutputStream(new FileOutputStream(out), pkCipher);
-        //System.out.println(aesKey.getBytes());
         os.write(aesKey.getBytes());
         os.close();
     }
@@ -57,13 +54,13 @@ public class PkCrypt {
         byte[] encodedKey = new byte[(int)privateKeyFile.length()];
         new FileInputStream(privateKeyFile).read(encodedKey);
 
-        // create private key
+        //create public key
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedKey);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         PrivateKey pk = kf.generatePrivate(privateKeySpec);
 
         // read AES key
-        pkCipher.init(Cipher.ENCRYPT_MODE, pk);
+        pkCipher.init(Cipher.DECRYPT_MODE, pk);
         FileInputStream ifs = new FileInputStream(in);
         byte[] aesKey = new byte[1];
         StringBuilder sb = new StringBuilder();

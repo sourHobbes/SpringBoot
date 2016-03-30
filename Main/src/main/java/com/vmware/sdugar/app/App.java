@@ -4,14 +4,13 @@
 package com.vmware.sdugar.app;
 
 import com.vmware.sdugar.model.DsaSigner;
-import com.vmware.sdugar.model.PasswordEncoderConfig;
 import com.vmware.sdugar.model.PkCrypt;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
-import java.util.UUID;
+import java.util.Base64;
 
 /**
  * Author: sdugar
@@ -37,7 +36,10 @@ public class App {
 
       DsaSigner signer = new DsaSigner();
       byte[] signature = signer.sign("hereisavalue");
-      boolean data = signer.verify(signature, "hereisavalue");
+      final String signedString = Base64.getEncoder().encodeToString(signature);
+      System.out.println("The signature is " + signedString);
+      boolean data = signer.verify(Base64.getDecoder().decode(signedString.getBytes()),
+              "hereisavalue");
       System.out.println("the signature verification result: " + data);
 
       PkCrypt crypt = new PkCrypt("/Users/sourabhdugar/java/public.der",
@@ -58,7 +60,7 @@ public class App {
       //SpringApplication app = new SpringApplication(App.class);
       //app.setBannerMode(Banner.Mode.CONSOLE);
       //app.run(args);
-      String secret = crypt.loadKey(new File("/Users/sourabhdugar/java/shared_enc2"));
-      crypt.saveKey(new File("/Users/sourabhdugar/java/decoded2"), secret);
+      crypt.saveKey(new File("/Users/sourabhdugar/java/shared_enc2"), "supersecretkeyword");
+      crypt.loadKey(new File("/Users/sourabhdugar/java/shared_enc2"));
    }
 }
