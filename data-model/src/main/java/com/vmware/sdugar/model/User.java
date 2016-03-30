@@ -4,11 +4,14 @@
 
 package com.vmware.sdugar.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import javax.persistence.*;
+import java.util.Base64;
+import java.util.UUID;
 
 /**
  * Author: sdugar
@@ -19,35 +22,44 @@ import javax.persistence.Id;
 public class User {
 
    @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   public long id;
+   @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
+   @GeneratedValue(generator = "uuid-gen")
+   private UUID id;
+
+   @Autowired
+   @Transient
+   private PasswordEncoder encoder;
 
    @Column
-   public String name;
+   private String name;
 
    @Column
-   public String phone;
+   private String phone;
 
    @Column(unique = true)
-   public String userName;
+   private String userName;
 
-   @Column(nullable = false)
-   public String password;
+   @Column
+   private String password;
+
+   @Transient
+   private String jwtToken;
 
    public User() {
 
    }
 
-   public User (long id, String name, String phone,
-                String userName, String password) {
-      this.id = id;
+   public User(String name, String phone,
+               String userName, String password,
+               String jwtToken) {
       this.name = name;
       this.phone = phone;
       this.userName = userName;
       this.password = password;
+      this.jwtToken = jwtToken;
    }
 
-   public long getId() {
+   public UUID getId() {
       return this.id;
    }
 
@@ -88,5 +100,13 @@ public class User {
       public UserAlreadyExistsException(String userName, Throwable cause) {
          super("User name " + userName + " already taken!", cause);
       }
+   }
+
+   public String getJwtToken() {
+      return jwtToken;
+   }
+
+   public void setJwtToken(String jwtToken) {
+      this.jwtToken = jwtToken;
    }
 }
