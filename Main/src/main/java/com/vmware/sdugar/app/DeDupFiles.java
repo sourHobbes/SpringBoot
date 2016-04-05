@@ -3,8 +3,7 @@ package com.vmware.sdugar.app;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Paths;
@@ -28,6 +27,14 @@ public class DeDupFiles {
       return files;
    }
 
+   /**
+    * This function performs a dir walk to list all files up to {@param depth}
+    *
+    * @param dir    The directory to walk. A 0 value means all sub-directories are explored
+    * @param depth  The depth at which to stop exploring sub-directories
+    *
+    * @return       List of {@link File} objects obtained by performing the walk
+     */
    public static List<File> nDeepDirWalk(final String dir,
                                          final int depth) {
       Queue<File> depthStack = new LinkedList<>();
@@ -42,37 +49,115 @@ public class DeDupFiles {
          final File f = depthStack.remove();
          if (f == MARKER) {
             retFiles.add(MARKER);
-            if (++explored >= depth) {
+            if (depth > 0 && ++explored >= depth) {
                break;
             }
             depthStack.add(MARKER);
             continue;
          }
-         for (final File fi : f.listFiles()) {
-            if (fi.isDirectory()) {
-               depthStack.add(fi);
+         if (f.listFiles() != null) {
+            for (final File fi : f.listFiles()) {
+               if (fi.isDirectory()) {
+                  depthStack.add(fi);
+               } else {
+                  retFiles.add(fi);
+               }
             }
-            retFiles.add(fi);
          }
       }
 
       return retFiles;
    }
 
-   public static List<File> deDupFiles(List<File> files)
+   public static Set<String> deDupFilesRec(Map<String, FileInputStream> files)
+           throws IOException {
+      Map<String, FileInputStream> dupMap = new HashMap<>();
+      Map<String, List<String>> matchMap = new HashMap<>();
+      Set<String> dupFiles = new HashSet<>();
+
+      for (Map.Entry<String, FileInputStream> e : files.entrySet()) {
+         if (e.getValue().available() <= 0) {
+            // no more to read and we matched everything till now
+            // so we have duplicates
+            dupFiles.addAll(files.keySet());
+            break;
+         }
+
+         byte [] bytes = new byte[100];
+         e.getValue().read(bytes, 0, bytes.length);
+
+         String match = new String(bytes);
+         List<String> matches = matchMap.getOrDefault(match, new ArrayList<>());
+         matches.add(e.getKey());
+         matchMap.put(match, matches);
+      }
+      for (Map.Entry<String, List<String>> e : matchMap.entrySet()) {
+         if (e.getValue().size() < 2) {
+            continue;
+         }
+         e.getValue().stream().forEach((s) -> dupMap.put(s, files.get(s)));
+         dupFiles.addAll(deDupFilesRec(dupMap));
+      }
+
+      return dupFiles;
+   }
+
+   public static List<Set<String>> deDupFiles(List<File> files)
          throws IOException {
+      Map<Long, List<File>> fileSizeMap = new HashMap<>();
+      List<Set<String>> dupFileSets = new ArrayList<>();
+
       for (File fi : files) {
+         if (fi == MARKER) continue;
          BasicFileAttributes attr = Files.readAttributes(Paths.get(fi.getAbsolutePath()),
                BasicFileAttributes.class);
          log.info(String.format("File : %40s : %-10s", fi.getAbsolutePath(), attr.size()));
+         if (fileSizeMap.get(attr.size()) == null) {
+            List<File> sameSizeFiles = new ArrayList<>();
+            sameSizeFiles.add(fi);
+            fileSizeMap.put(attr.size(), sameSizeFiles);
+         } else {
+            fileSizeMap.get(attr.size()).add(fi);
+         }
       }
-      return null;
+      // all files of 0 length are duplicates
+      if (fileSizeMap.get(0) != null) {
+         Set<File> dupSet = new HashSet<>();
+         fileSizeMap.remove(0).stream().forEach(dupSet::add);
+      }
+      for (final Map.Entry<Long, List<File>> e :
+              fileSizeMap.entrySet()) {
+         if (e.getValue().size() < 2) {
+            continue;
+         }
+         final Map<String, FileInputStream> deDupSet = new HashMap<>();
+         try {
+            e.getValue().stream().forEach((f) -> {
+               try {
+                  log.info("adding file with size : {} name : {}",
+                          e.getKey(), e.getValue());
+                  final FileInputStream fis = new FileInputStream(f);
+                  deDupSet.put(f.getAbsolutePath(), fis);
+               } catch (FileNotFoundException e1) {
+                  e1.printStackTrace();
+               }
+            });
+
+            Set<String> dupFiles = deDupFilesRec(deDupSet);
+            dupFileSets.add(dupFiles);
+         } finally {
+            for (FileInputStream fis : deDupSet.values()) {
+               fis.close();
+            }
+         }
+      }
+      return dupFileSets;
    }
 
    public static void main(String[] args) {
       try {
          StringBuilder sb = new StringBuilder("");
-         List<File> files = nDeepDirWalk("/Users/sdugar/testcodes", 3);
+         List<File> files = nDeepDirWalk("/Users/sourabhdugar/testcodes/testdir", 3);
 
          files.stream().forEach(
                (f) -> {
@@ -82,7 +167,16 @@ public class DeDupFiles {
                      log.info(sb.toString() + f.getAbsolutePath());
                   }
                });
-         deDupFiles(files);
+         List<Set<String>> fileSets = deDupFiles(files);
+         fileSets.stream().forEach((set) -> {
+            StringBuilder fileNames = new StringBuilder();
+            set.stream().forEach((s) -> {
+               fileNames.append(s).append(",");
+            });
+            log.info("----------------");
+            log.info(fileNames.toString());
+            log.info("----------------");
+         });
       } catch (Exception e) {
          e.printStackTrace();
       }
