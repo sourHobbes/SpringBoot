@@ -4,6 +4,7 @@
 package com.vmware.sdugar.app;
 
 import com.vmware.sdugar.model.DsaSigner;
+import com.vmware.sdugar.model.PasswordEncoderConfig;
 import com.vmware.sdugar.model.PkCrypt;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
 import java.util.Base64;
+import java.util.UUID;
 
 /**
  * Author: sdugar
@@ -44,16 +46,15 @@ public class App {
 
       PkCrypt crypt = new PkCrypt("/Users/sourabhdugar/java/public.der",
               "/Users/sourabhdugar/java/private.der");
-      final String userPassword = new BCryptPasswordEncoder().encode("sharedsecrethere");
+      final String userPassword = "sharedSecretHere";
 
-      //String jwtToken =
-      //  PasswordEncoderConfig.createJWT(UUID.randomUUID().toString(), "SOURABH",
-      //     "AUTH_TOKEN", userPassword);
+      String jwtToken =
+         PasswordEncoderConfig.createJWT(UUID.randomUUID().toString(), "SOURABH",
+            "AUTH_TOKEN", userPassword);
       //crypt.saveKey(new File("/Users/sourabhdugar/java/shared_enc"), jwtToken);
       //String shared = crypt.loadKey(new File("/Users/sourabhdugar/java/shared_enc"));
 //
-      //PasswordEncoderConfig.parseJWT(shared,
-      //        userPassword);
+      PasswordEncoderConfig.parseJWT(jwtToken, userPassword);
       //System.out.println("The password match result is " +
       //        new BCryptPasswordEncoder().matches("sharedsecrethere", userPassword));
       //System.out.println("The shared secret is " + shared);
