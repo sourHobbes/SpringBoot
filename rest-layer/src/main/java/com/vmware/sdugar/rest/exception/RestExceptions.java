@@ -3,6 +3,7 @@ package com.vmware.sdugar.rest.exception;
 import com.vmware.sdugar.model.User;
 import com.vmware.sdugar.rest.UserController;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,5 +24,12 @@ public class RestExceptions {
             throws IOException {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 e.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public void handleNoAuthenticationObject(HttpServletResponse response, Exception e)
+            throws IOException {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                "unable to authorize user");
     }
 }

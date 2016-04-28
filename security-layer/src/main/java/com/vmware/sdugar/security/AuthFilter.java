@@ -4,6 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,16 +30,28 @@ import java.util.Map;
 /**
  * Created by sourabhdugar on 4/9/16.
  */
+@Configurable
+@Configuration
 public class AuthFilter extends GenericFilterBean
         /*AbstractAuthenticationProcessingFilter*/ {
 
     private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
 
-    private final AuthenticationManager manager;
+    @Autowired
+    private AuthenticationManager manager;
 
-    public AuthFilter(AuthenticationManager manager) {
-        //super(defaultRequestUrl);
-        this.manager = manager;
+    @Autowired
+    private  ApplicationContext ctx;
+
+    public AuthFilter() {
+
+    }
+
+    @Bean
+    public FilterRegistrationBean registration(AuthFilter filter) {
+        FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     public Map<String, String> readRequestBodyAsJson(
@@ -83,7 +101,7 @@ public class AuthFilter extends GenericFilterBean
 
     /**
      * Credits : https://gist.github.com/calo81/2071634
-     * 
+     *
      */
     private static class ResettableStreamHttpServletRequest extends
             HttpServletRequestWrapper {

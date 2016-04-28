@@ -1,5 +1,6 @@
 package com.vmware.sdugar.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         super(true);
     }
 
+    @Autowired
+    private AuthFilter authFilter;
+
     @Override
     protected void configure(HttpSecurity http)
             throws Exception {
@@ -57,10 +61,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/admin/**").hasRole("ADMIN")
 
             //all other request need to be authenticated
-            .anyRequest().authenticated().and()
+            .anyRequest().authenticated().and().antMatcher("/api/admin")
 
             // custom JSON based authentication by POST of {"username":"<name>","password":"<password>"} which sets the token header upon authentication
-            .addFilterBefore(new AuthFilter(authenticationManagerBean()), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
