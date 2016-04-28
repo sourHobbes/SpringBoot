@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.Transient;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Author: sdugar
@@ -83,5 +85,11 @@ public class UserController {
       User user = users.findByUserName(userName);
       PasswordEncoderConfig.parseJWT(token, user.getPassword());
       return true;
+   }
+
+   @RequestMapping(value = "/api/admin")
+   @PreAuthorize("hasRole('ROLE_ANON')")
+   public void getBodyWithApiAdmin(@RequestBody String body) {
+      log.info("The request body is \n:{}\n\n", body);
    }
 }

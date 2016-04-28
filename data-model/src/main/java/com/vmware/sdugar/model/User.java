@@ -4,11 +4,18 @@
 
 package com.vmware.sdugar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.persistence.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -20,6 +27,7 @@ import java.util.UUID;
 public class User {
 
    @Id
+   @JsonIgnore
    @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
    @GeneratedValue(generator = "uuid-gen")
    private UUID id;
@@ -38,6 +46,7 @@ public class User {
    private String userName;
 
    @Column
+   @JsonIgnore
    private String password;
 
    @Transient
@@ -94,7 +103,7 @@ public class User {
    }
 
    public static class UserAlreadyExistsException
-           extends RuntimeException {
+           extends IllegalArgumentException {
       public UserAlreadyExistsException(String userName, Throwable cause) {
          super("User name " + userName + " already taken!", cause);
       }

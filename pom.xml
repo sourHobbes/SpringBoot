@@ -13,6 +13,7 @@
       <module>db-layer</module>
       <module>data-model</module>
       <module>Main</module>
+      <module>security-layer</module>
    </modules>
    <build>
       <plugins>

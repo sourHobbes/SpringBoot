@@ -6,8 +6,13 @@ package com.vmware.sdugar.app;
 import com.vmware.sdugar.model.DsaSigner;
 import com.vmware.sdugar.model.PasswordEncoderConfig;
 import com.vmware.sdugar.model.PkCrypt;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.boot.Banner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
@@ -24,18 +29,18 @@ import java.util.UUID;
       basePackages = {"com.vmware.sdugar.db",
                       "com.vmware.sdugar.app",
                       "com.vmware.sdugar.rest",
-                      "com.vmware.sdugar.model"}
+                      "com.vmware.sdugar.rest.exception",
+                      "com.vmware.sdugar.model",
+                      "com.vmware.sdugar.security"}
 )
 public class App {
 
    public static void main(String[] args) throws Throwable {
+      SpringApplication app = new SpringApplication(App.class);
+      app.setBannerMode(Banner.Mode.CONSOLE);
+      app.run(args);
+
       /*
-      ClassPathXmlApplicationContext applicationContext =
-            new ClassPathXmlApplicationContext(new String[] {"classpath:application-context.xml"});
-      System.out.println("application context is " + applicationContext);
-      */
-
-
       DsaSigner signer = new DsaSigner();
       byte[] signature = signer.sign("hereisavalue");
       final String signedString = Base64.getEncoder().encodeToString(signature);
@@ -53,7 +58,7 @@ public class App {
             "AUTH_TOKEN", userPassword);
       //crypt.saveKey(new File("/Users/sourabhdugar/java/shared_enc"), jwtToken);
       //String shared = crypt.loadKey(new File("/Users/sourabhdugar/java/shared_enc"));
-//
+
       PasswordEncoderConfig.parseJWT(jwtToken, userPassword);
       //System.out.println("The password match result is " +
       //        new BCryptPasswordEncoder().matches("sharedsecrethere", userPassword));
@@ -63,5 +68,6 @@ public class App {
       //app.run(args);
       crypt.saveKey(new File("/Users/sourabhdugar/java/shared_enc2"), "supersecretkeyword");
       crypt.loadKey(new File("/Users/sourabhdugar/java/shared_enc2"));
+      */
    }
 }

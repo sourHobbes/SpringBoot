@@ -9,6 +9,7 @@ import java.nio.file.NotDirectoryException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sdugar on 4/1/16.
@@ -55,6 +56,7 @@ public class DeDupFiles {
             depthStack.add(MARKER);
             continue;
          }
+
          if (f.listFiles() != null) {
             for (final File fi : f.listFiles()) {
                if (fi.isDirectory()) {
@@ -91,13 +93,15 @@ public class DeDupFiles {
          matches.add(e.getKey());
          matchMap.put(match, matches);
       }
-      for (Map.Entry<String, List<String>> e : matchMap.entrySet()) {
-         if (e.getValue().size() < 2) {
-            continue;
-         }
-         e.getValue().stream().forEach((s) -> dupMap.put(s, files.get(s)));
-         dupFiles.addAll(deDupFilesRec(dupMap));
-      }
+      matchMap.entrySet().stream().filter((e) -> e.getValue().size() > 1)
+         .forEach((e) -> {
+            e.getValue().stream().forEach((s) -> dupMap.put(s, files.get(s)));
+            try {
+               dupFiles.addAll(deDupFilesRec(dupMap));
+            } catch (IOException e1) {
+               e1.printStackTrace();
+            }
+         });
 
       return dupFiles;
    }
@@ -111,7 +115,7 @@ public class DeDupFiles {
          if (fi == MARKER) continue;
          BasicFileAttributes attr = Files.readAttributes(Paths.get(fi.getAbsolutePath()),
                BasicFileAttributes.class);
-         log.info(String.format("File : %40s : %-10s", fi.getAbsolutePath(), attr.size()));
+         log.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
          if (fileSizeMap.get(attr.size()) == null) {
             List<File> sameSizeFiles = new ArrayList<>();
             sameSizeFiles.add(fi);
@@ -125,39 +129,41 @@ public class DeDupFiles {
          Set<File> dupSet = new HashSet<>();
          fileSizeMap.remove(0).stream().forEach(dupSet::add);
       }
-      for (final Map.Entry<Long, List<File>> e :
-              fileSizeMap.entrySet()) {
-         if (e.getValue().size() < 2) {
-            continue;
-         }
-         final Map<String, FileInputStream> deDupSet = new HashMap<>();
-         try {
-            e.getValue().stream().forEach((f) -> {
-               try {
-                  log.info("adding file with size : {} name : {}",
-                          e.getKey(), e.getValue());
-                  final FileInputStream fis = new FileInputStream(f);
-                  deDupSet.put(f.getAbsolutePath(), fis);
-               } catch (FileNotFoundException e1) {
-                  e1.printStackTrace();
+      fileSizeMap.entrySet().stream().filter((e) -> e.getValue().size() > 1)
+         .forEach((e) -> {
+            final Map<String, FileInputStream> deDupSet = new HashMap<>();
+            try {
+               e.getValue().stream().forEach((f) -> {
+                  try {
+                     log.info("adding file with size : {} name : {}",
+                             e.getKey(), e.getValue());
+                     final FileInputStream fis = new FileInputStream(f);
+                     deDupSet.put(f.getAbsolutePath(), fis);
+                  } catch (FileNotFoundException e1) {
+                     e1.printStackTrace();
+                  }
+               });
+               Set<String> dupFiles = deDupFilesRec(deDupSet);
+               dupFileSets.add(dupFiles);
+            } catch (IOException e1) {
+               e1.printStackTrace();
+            } finally {
+               for (FileInputStream fis : deDupSet.values()) {
+                  try {
+                     fis.close();
+                  } catch (IOException e1) {
+                     e1.printStackTrace();
+                  }
                }
-            });
-
-            Set<String> dupFiles = deDupFilesRec(deDupSet);
-            dupFileSets.add(dupFiles);
-         } finally {
-            for (FileInputStream fis : deDupSet.values()) {
-               fis.close();
             }
-         }
-      }
+         });
       return dupFileSets;
    }
 
    public static void main(String[] args) {
       try {
          StringBuilder sb = new StringBuilder("");
-         List<File> files = nDeepDirWalk("/Users/sourabhdugar/testcodes/testdir", 3);
+         List<File> files = nDeepDirWalk("/Users/sourabhdugar/testcodes/", 3);
 
          files.stream().forEach(
                (f) -> {
@@ -170,9 +176,7 @@ public class DeDupFiles {
          List<Set<String>> fileSets = deDupFiles(files);
          fileSets.stream().forEach((set) -> {
             StringBuilder fileNames = new StringBuilder();
-            set.stream().forEach((s) -> {
-               fileNames.append(s).append(",");
-            });
+            set.stream().forEach((s) -> fileNames.append(s).append(","));
             log.info("----------------");
             log.info(fileNames.toString());
             log.info("----------------");
