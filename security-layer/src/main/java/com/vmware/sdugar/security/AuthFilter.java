@@ -116,7 +116,6 @@ public class AuthFilter extends GenericFilterBean
             this.servletStream = new ResettableServletInputStream();
         }
 
-
         public void resetInputStream() {
             servletStream.stream = new ByteArrayInputStream(rawData);
         }

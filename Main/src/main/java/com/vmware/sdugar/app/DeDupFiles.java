@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +20,9 @@ import java.util.stream.Collectors;
 public class DeDupFiles {
    public static final Logger log = LoggerFactory.getLogger(DeDupFiles.class);
    public static final File MARKER = new File("");
-   
+   private static final int BYTES_TO_READ = 10000;
+   private static final int BYTES_TO_READ_LARGE = 100 * BYTES_TO_READ;
+
    public static List<File> dirWalk(String dir)
          throws NotDirectoryException {
       File d = new File(dir);
@@ -71,37 +76,43 @@ public class DeDupFiles {
       return retFiles;
    }
 
-   public static Set<String> deDupFilesRec(Map<String, FileInputStream> files)
+   public static List<Set<String>> deDupFilesRec(final Map<String, FileInputStream> files)
            throws IOException {
       Map<String, FileInputStream> dupMap = new HashMap<>();
       Map<String, List<String>> matchMap = new HashMap<>();
-      Set<String> dupFiles = new HashSet<>();
+      List<Set<String>> dupFiles = new ArrayList<>();
+
+      final Consumer<Map.Entry<String, List<String>>> matchConsumer =
+            (Map.Entry<String, List<String>> e) -> {
+               log.info("Deduping file set {}", e.getValue());
+               Map<String, FileInputStream> dupStreams =
+                       e.getValue().stream().collect(Collectors.toMap(Function.identity(), files::get));
+               try {
+                  deDupFilesRec(dupStreams).forEach(dupFiles::add);
+               } catch (IOException e1) {
+                  log.error("IO exception", e);
+               }
+            };
 
       for (Map.Entry<String, FileInputStream> e : files.entrySet()) {
          if (e.getValue().available() <= 0) {
             // no more to read and we matched everything till now
             // so we have duplicates
-            dupFiles.addAll(files.keySet());
+            dupFiles.add(files.keySet());
             break;
          }
-
-         byte [] bytes = new byte[100];
+         byte [] bytes = new byte[BYTES_TO_READ_LARGE];
          e.getValue().read(bytes, 0, bytes.length);
-
          String match = new String(bytes);
          List<String> matches = matchMap.getOrDefault(match, new ArrayList<>());
          matches.add(e.getKey());
          matchMap.put(match, matches);
       }
-      matchMap.entrySet().stream().filter((e) -> e.getValue().size() > 1)
-         .forEach((e) -> {
-            e.getValue().stream().forEach((s) -> dupMap.put(s, files.get(s)));
-            try {
-               dupFiles.addAll(deDupFilesRec(dupMap));
-            } catch (IOException e1) {
-               e1.printStackTrace();
-            }
-         });
+
+      matchMap.entrySet()
+              .stream()
+              .filter(e -> e.getValue().size() > 1)
+              .forEach(matchConsumer);
 
       return dupFiles;
    }
@@ -109,12 +120,20 @@ public class DeDupFiles {
    public static List<Set<String>> deDupFiles(List<File> files)
          throws IOException {
       Map<Long, List<File>> fileSizeMap = new HashMap<>();
-      List<Set<String>> dupFileSets = new ArrayList<>();
+      final List<Set<String>> dupFileSets = new ArrayList<>();
 
       for (File fi : files) {
          if (fi == MARKER) continue;
-         BasicFileAttributes attr = Files.readAttributes(Paths.get(fi.getAbsolutePath()),
-               BasicFileAttributes.class);
+         BasicFileAttributes attr = null;
+         try {
+            attr = Files.readAttributes(Paths.get(fi.toURI()), BasicFileAttributes.class);
+            // a special file like a socket, pipe etc..skip it..
+            if (attr.isOther()) continue;
+         } catch (NoSuchFileException nsfe) {
+            // FIXME this happens with filenames have spaces in name
+            log.warn("Can't find file : {}", fi.getAbsolutePath());
+            continue;
+         }
          log.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
          if (fileSizeMap.get(attr.size()) == null) {
             List<File> sameSizeFiles = new ArrayList<>();
@@ -135,16 +154,15 @@ public class DeDupFiles {
             try {
                e.getValue().stream().forEach((f) -> {
                   try {
-                     log.info("adding file with size : {} name : {}",
-                             e.getKey(), e.getValue());
+                     //log.info("adding file with size : {} name : {}",
+                     //        e.getKey(), e.getValue());
                      final FileInputStream fis = new FileInputStream(f);
                      deDupSet.put(f.getAbsolutePath(), fis);
                   } catch (FileNotFoundException e1) {
                      e1.printStackTrace();
                   }
                });
-               Set<String> dupFiles = deDupFilesRec(deDupSet);
-               dupFileSets.add(dupFiles);
+               deDupFilesRec(deDupSet).forEach(dupFileSets::add);
             } catch (IOException e1) {
                e1.printStackTrace();
             } finally {
@@ -163,7 +181,7 @@ public class DeDupFiles {
    public static void main(String[] args) {
       try {
          StringBuilder sb = new StringBuilder("");
-         List<File> files = nDeepDirWalk("/Users/sourabhdugar/testcodes/", 3);
+         List<File> files = nDeepDirWalk("/Users/sourabhdugar/", 1);
 
          files.stream().forEach(
                (f) -> {
@@ -174,7 +192,7 @@ public class DeDupFiles {
                   }
                });
          List<Set<String>> fileSets = deDupFiles(files);
-         fileSets.stream().forEach((set) -> {
+         fileSets.stream().filter((set) -> !set.isEmpty()).forEach((set) -> {
             StringBuilder fileNames = new StringBuilder();
             set.stream().forEach((s) -> fileNames.append(s).append(","));
             log.info("----------------");
