@@ -102,8 +102,8 @@ public class DeDupFiles {
             break;
          }
          byte [] bytes = new byte[BYTES_TO_READ_LARGE];
-         e.getValue().read(bytes, 0, bytes.length);
-         String match = new String(bytes);
+         int readLen = e.getValue().read(bytes, 0, bytes.length);
+         String match = new String(bytes, 0, readLen);
          List<String> matches = matchMap.getOrDefault(match, new ArrayList<>());
          matches.add(e.getKey());
          matchMap.put(match, matches);
