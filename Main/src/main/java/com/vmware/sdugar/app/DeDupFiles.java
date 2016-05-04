@@ -101,6 +101,7 @@ public class DeDupFiles {
             dupFiles.add(files.keySet());
             break;
          }
+         
          byte [] bytes = new byte[BYTES_TO_READ_LARGE];
          int readLen = e.getValue().read(bytes, 0, bytes.length);
          String match = new String(bytes, 0, readLen);
@@ -148,6 +149,7 @@ public class DeDupFiles {
          Set<File> dupSet = new HashSet<>();
          fileSizeMap.remove(0).stream().forEach(dupSet::add);
       }
+
       fileSizeMap.entrySet().stream().filter((e) -> e.getValue().size() > 1)
          .forEach((e) -> {
             final Map<String, FileInputStream> deDupSet = new HashMap<>();
@@ -175,6 +177,7 @@ public class DeDupFiles {
                }
             }
          });
+
       return dupFileSets;
    }
 
