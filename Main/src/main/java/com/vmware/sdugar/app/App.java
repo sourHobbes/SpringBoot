@@ -36,11 +36,10 @@ import java.util.UUID;
 public class App {
 
    public static void main(String[] args) throws Throwable {
-      SpringApplication app = new SpringApplication(App.class);
-      app.setBannerMode(Banner.Mode.CONSOLE);
-      app.run(args);
+      //SpringApplication app = new SpringApplication(App.class);
+      //app.setBannerMode(Banner.Mode.CONSOLE);
+      //app.run(args);
 
-      /*
       DsaSigner signer = new DsaSigner();
       byte[] signature = signer.sign("hereisavalue");
       final String signedString = Base64.getEncoder().encodeToString(signature);
@@ -48,7 +47,7 @@ public class App {
       boolean data = signer.verify(Base64.getDecoder().decode(signedString.getBytes()),
               "hereisavalue");
       System.out.println("the signature verification result: " + data);
-
+      /*
       PkCrypt crypt = new PkCrypt("/Users/sourabhdugar/java/public.der",
               "/Users/sourabhdugar/java/private.der");
       final String userPassword = "sharedSecretHere";
