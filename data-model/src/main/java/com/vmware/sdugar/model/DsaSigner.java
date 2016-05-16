@@ -1,12 +1,12 @@
 package com.vmware.sdugar.model;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -17,6 +17,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
@@ -35,19 +36,24 @@ public class DsaSigner {
     private final SecureRandom random;
     private final PrivateKey priv;
     private final PublicKey pub;
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
     File publicKeyFile = new File("/Users/sourabhdugar/java/keys/domain.crt");
     File privateKeyFile = new File("/Users/sourabhdugar/java/keys/rsaprivkey.der");
+    private static final String PROVIDER_NAME = BouncyCastleProvider.PROVIDER_NAME;
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     private final static Logger log = LoggerFactory.getLogger(DsaSigner.class);
 
     public DsaSigner()
             throws NoSuchProviderException, NoSuchAlgorithmException {
-        keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
-        random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        keyGen = KeyPairGenerator.getInstance("RSA", PROVIDER_NAME);
+        //random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        random = SecureRandom.getInstanceStrong();
 
-        keyGen.initialize(1024, random);
-
-        KeyPair pair = keyGen.generateKeyPair();
+        KeyPair pair = keyGen.generateKeyPair(); // "BC" default key strength is 2048..
         priv = pair.getPrivate();
         pub = pair.getPublic();
     }
@@ -58,7 +64,7 @@ public class DsaSigner {
                    IOException {
         Signature dsa = null;
         try {
-            dsa = Signature.getInstance("SHA1withRSA");
+            dsa = Signature.getInstance(SIGNATURE_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             log.error("Exception occured while signing", e);
         }
@@ -81,7 +87,7 @@ public class DsaSigner {
             IOException, CertificateException {
         Signature dsa = null;
         try {
-            dsa = Signature.getInstance("SHA1withRSA");
+            dsa = Signature.getInstance(SIGNATURE_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             log.error("Exception occured while signing", e);
         }

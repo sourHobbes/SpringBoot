@@ -69,7 +69,7 @@ public class PkCrypt {
             sb.append((char)aesKey[0]);
         }
         System.out.println(sb);
-        SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
-        return new String(sb.toString());
+        //SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
+        return sb.toString();
     }
 }
