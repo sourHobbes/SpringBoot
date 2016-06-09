@@ -2,19 +2,22 @@ package com.vmware.sdugar.model;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import java.io.IOException;
 
 /**
  * Created by sourabhdugar on 6/8/16.
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "id")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.PROPERTY, property = "id")
 @JsonSubTypes(value = {
-        @JsonSubTypes.Type(value = GlassCup.class, name = "1"),
-        @JsonSubTypes.Type(value = CeramicCup.class, name = "2")})
+        @JsonSubTypes.Type(value = GlassCup.class),
+        @JsonSubTypes.Type(value = CeramicCup.class)})
+@JsonTypeIdResolver(value = CommandTypeIdResolver.class)
 public abstract class Cup {
     //@JsonProperty(value = "id")
-    abstract String getId();
+    //abstract String getId();
 
     @JsonProperty(value = "lid")
     abstract boolean hasLid();
@@ -39,9 +42,9 @@ public abstract class Cup {
     public static void main(String[] args) throws IOException {
         Cup gc = new CeramicCup();
         gc.setClazz(CeramicCup.class);
-        gc.setId("2");
+        //gc.setId("2");
         ObjectMapper om = new ObjectMapper();
-        CeramicCup c = om.readValue(om.writeValueAsString(gc), CeramicCup.class);
+        Cup c = om.readValue(om.writeValueAsString(gc), Cup.class);
         System.out.println(om.writeValueAsString(gc));
     }
 }

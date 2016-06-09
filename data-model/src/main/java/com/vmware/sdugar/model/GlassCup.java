@@ -2,16 +2,13 @@ package com.vmware.sdugar.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
 /**
  * Created by sourabhdugar on 6/8/16.
  */
-@JsonTypeName("1")
+@JsonTypeIdResolver(CommandTypeIdResolver.class)
 public class GlassCup extends Cup {
-    @Override
-    public String getId() {
-        return "1";
-    }
 
     @Override
     @JsonProperty(value = "lid")
