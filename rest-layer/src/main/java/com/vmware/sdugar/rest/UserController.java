@@ -88,8 +88,8 @@ public class UserController {
    }
 
    @RequestMapping(value = "/api/admin")
-   @PreAuthorize("hasRole('ROLE_ANON')")
+   //@PreAuthorize("hasRole('ROLE_ANON')")
    public void getBodyWithApiAdmin(@RequestBody String body) {
-      log.info("The request body is \n:{}\n\n", body);
+      log.info("The request body is :\n{}\n\n", body);
    }
 }

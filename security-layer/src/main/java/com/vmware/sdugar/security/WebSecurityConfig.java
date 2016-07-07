@@ -37,6 +37,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthFilter authFilter;
 
+    @Autowired
+    private LoggingFilter loggingFilter;
+
     @Override
     protected void configure(HttpSecurity http)
             throws Exception {
@@ -57,14 +60,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             //allow anonymous GETs to API
             .antMatchers(HttpMethod.GET, "/api/**").permitAll()
 
-            //defined Admin only API area
-            .antMatchers("/admin/**").hasRole("ADMIN")
-
             //all other request need to be authenticated
-            .anyRequest().authenticated().and().antMatcher("/api/admin")
+            .antMatchers("/user/**").authenticated().and()
 
             // custom JSON based authentication by POST of {"username":"<name>","password":"<password>"} which sets the token header upon authentication
+            .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
+
     }
 
     @Override
