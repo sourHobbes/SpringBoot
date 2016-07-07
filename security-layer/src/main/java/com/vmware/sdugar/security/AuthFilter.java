@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +17,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,24 +34,24 @@ import java.util.Map;
 /**
  * Created by sourabhdugar on 4/9/16.
  */
-@Configurable
+@Component
 @Configuration
 public class AuthFilter extends GenericFilterBean
         /*AbstractAuthenticationProcessingFilter*/ {
 
     private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
 
-    @Autowired
-    private AuthenticationManager manager;
-
-    @Autowired
-    private  ApplicationContext ctx;
+    //@Autowired
+    //private AuthenticationManager manager;
+    //
+    //@Autowired
+    //private  ApplicationContext ctx;
 
     public AuthFilter() {
 
     }
 
-    @Bean
+    @Bean(name="authFilterRegistrationBean")
     public FilterRegistrationBean registration(AuthFilter filter) {
         FilterRegistrationBean registration = new FilterRegistrationBean(filter);
         registration.setEnabled(false);
@@ -84,11 +88,12 @@ public class AuthFilter extends GenericFilterBean
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(authority);
-        Authentication auth =
-            manager.authenticate(new RememberMeAuthenticationToken("secret", "admin1", authorities));
+        //Authentication auth =
+        //    manager.authenticate(new RememberMeAuthenticationToken("secret", "admin1", authorities));
         //Authentication auth = new RememberMeAuthenticationToken("any", "any", authorities);
         //auth.setAuthenticated(true);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        SecurityContextHolder.getContext().setAuthentication(
+                new RememberMeAuthenticationToken("secret", "admin1", authorities));
         filterChain.doFilter(wrappedRequest, response);
         SecurityContextHolder.getContext().setAuthentication(null);
     }

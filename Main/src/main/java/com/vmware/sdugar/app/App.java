@@ -36,9 +36,9 @@ import java.util.UUID;
 public class App {
 
    public static void main(String[] args) throws Throwable {
-      //SpringApplication app = new SpringApplication(App.class);
-      //app.setBannerMode(Banner.Mode.CONSOLE);
-      //app.run(args);
+      SpringApplication app = new SpringApplication(App.class);
+      app.setBannerMode(Banner.Mode.CONSOLE);
+      app.run(args);
 
       DsaSigner signer = new DsaSigner();
       byte[] signature = signer.sign("hereisavalue");
