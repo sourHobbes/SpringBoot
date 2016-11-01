@@ -58,7 +58,7 @@ public class DeDupFiles {
             if (depth > 0 && ++explored >= depth) {
                break;
             }
-            depthStack.add(MARKER);
+            //depthStack.add(MARKER);
             continue;
          }
 
