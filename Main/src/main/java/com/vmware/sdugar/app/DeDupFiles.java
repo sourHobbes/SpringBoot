@@ -136,13 +136,7 @@ public class DeDupFiles {
             continue;
          }
          log.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
-         if (fileSizeMap.get(attr.size()) == null) {
-            List<File> sameSizeFiles = new ArrayList<>();
-            sameSizeFiles.add(fi);
-            fileSizeMap.put(attr.size(), sameSizeFiles);
-         } else {
-            fileSizeMap.get(attr.size()).add(fi);
-         }
+         fileSizeMap.getOrDefault(attr.size(), new ArrayList<>()).add(fi);
       }
       // all files of 0 length are duplicates
       if (fileSizeMap.get(0) != null) {
