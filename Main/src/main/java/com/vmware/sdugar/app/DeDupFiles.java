@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class DeDupFiles {
    public static final Logger log = LoggerFactory.getLogger(DeDupFiles.class);
    public static final File MARKER = new File("");
-   private static final int BYTES_TO_READ = 10000;
+   private static final int BYTES_TO_READ = 1000;
    private static final int BYTES_TO_READ_LARGE = 100 * BYTES_TO_READ;
 
    public static List<File> dirWalk(String dir)
@@ -136,7 +136,8 @@ public class DeDupFiles {
             continue;
          }
          log.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
-         fileSizeMap.getOrDefault(attr.size(), new ArrayList<>()).add(fi);
+         fileSizeMap.putIfAbsent(attr.size(), new ArrayList<>());
+         fileSizeMap.get(attr.size()).add(fi);
       }
       // all files of 0 length are duplicates
       if (fileSizeMap.get(0) != null) {
