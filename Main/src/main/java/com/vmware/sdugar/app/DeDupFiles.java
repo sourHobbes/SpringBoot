@@ -12,13 +12,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Created by sdugar on 4/1/16.
  */
 public class DeDupFiles {
-   public static final Logger log = LoggerFactory.getLogger(DeDupFiles.class);
+   public static final Logger LOG = LoggerFactory.getLogger(DeDupFiles.class);
    public static final File MARKER = new File("");
    private static final int BYTES_TO_READ = 1000;
    private static final int BYTES_TO_READ_LARGE = 100 * BYTES_TO_READ;
@@ -84,13 +85,13 @@ public class DeDupFiles {
 
       final Consumer<Map.Entry<String, List<String>>> matchConsumer =
             (Map.Entry<String, List<String>> e) -> {
-               log.info("Deduping file set {}", e.getValue());
+               LOG.info("Deduping file set {}", e.getValue());
                Map<String, FileInputStream> dupStreams =
                        e.getValue().stream().collect(Collectors.toMap(Function.identity(), files::get));
                try {
                   deDupFilesRec(dupStreams).forEach(dupFiles::add);
                } catch (IOException e1) {
-                  log.error("IO exception", e);
+                  LOG.error("IO exception", e);
                }
             };
 
@@ -132,10 +133,10 @@ public class DeDupFiles {
             if (attr.isOther()) continue;
          } catch (NoSuchFileException nsfe) {
             // FIXME this happens with filenames have spaces in name
-            log.warn("Can't find file : {}", fi.getAbsolutePath());
+            LOG.warn("Can't find file : {}", fi.getAbsolutePath());
             continue;
          }
-         log.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
+         LOG.info(String.format("%-80s : %-10s", fi.getAbsolutePath(), attr.size()));
          fileSizeMap.putIfAbsent(attr.size(), new ArrayList<>());
          fileSizeMap.get(attr.size()).add(fi);
       }
@@ -151,7 +152,7 @@ public class DeDupFiles {
             try {
                e.getValue().stream().forEach((f) -> {
                   try {
-                     //log.info("adding file with size : {} name : {}",
+                     //LOG.info("adding file with size : {} name : {}",
                      //        e.getKey(), e.getValue());
                      final FileInputStream fis = new FileInputStream(f);
                      deDupSet.put(f.getAbsolutePath(), fis);
@@ -186,16 +187,17 @@ public class DeDupFiles {
                   if (f == MARKER) {
                      sb.append("\t");
                   } else {
-                     log.info(sb.toString() + f.getAbsolutePath());
+                     LOG.info(sb.toString() + f.getAbsolutePath());
                   }
                });
          List<Set<String>> fileSets = deDupFiles(files);
-         fileSets.stream().filter((set) -> !set.isEmpty()).forEach((set) -> {
+
+         fileSets.stream().filter(((Predicate<Set<String>>) Set::isEmpty).negate()).forEach((set) -> {
             StringBuilder fileNames = new StringBuilder();
             set.stream().forEach((s) -> fileNames.append(s).append(","));
-            log.info("----------------");
-            log.info(fileNames.toString());
-            log.info("----------------");
+            LOG.info("----------------");
+            LOG.info(fileNames.toString());
+            LOG.info("----------------");
          });
       } catch (Exception e) {
          e.printStackTrace();
